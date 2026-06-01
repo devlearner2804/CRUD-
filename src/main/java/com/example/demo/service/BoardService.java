@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +21,9 @@ public class BoardService {
 
     public List<BoardDTO> findAll() {
         List<BoardEntity> boardEntityList = boardRepository.findAll();
-        List<BoardDTO> boardDTOList = new ArrayList<>();
-        for (BoardEntity boardEntity: boardEntityList) {
-            boardDTOList.add(BoardDTO.toBoardDTO(boardEntity));
-        }
-        return boardDTOList;
+        return boardEntityList.stream()
+                .map(BoardDTO::toBoardDTO)
+                .toList();
     }
 
     @Transactional
@@ -36,13 +32,9 @@ public class BoardService {
     }
 
     public BoardDTO findById(Long id) {
-        Optional<BoardEntity> optionalBoardEntity = boardRepository.findById(id);
-        if (optionalBoardEntity.isPresent()) {
-            BoardEntity boardEntity = optionalBoardEntity.get();
-            return BoardDTO.toBoardDTO(boardEntity);
-        } else {
-            return null;
-        }
+        BoardEntity boardEntity = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("\uD574\uB2F9 \uAC8C\uC2DC\uAE00\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."));
+        return BoardDTO.toBoardDTO(boardEntity);
     }
 
     public void delete(Long id) {
@@ -52,11 +44,11 @@ public class BoardService {
     @Transactional
     public void update(BoardDTO boardDTO) {
         BoardEntity boardEntity = boardRepository.findById(boardDTO.getId()).orElseThrow(() ->
-                new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
-        if (boardEntity.getBoardPass().equals(boardDTO.getUpdatePass())) {
+                new IllegalArgumentException("\uD574\uB2F9 \uAC8C\uC2DC\uAE00\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."));
+        if (boardEntity.isPasswordMatched(boardDTO.getUpdatePass())) {
             boardEntity.update(boardDTO);
         } else {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("\uBE44\uBC00\uBC88\uD638\uAC00 \uC77C\uCE58\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.");
         }
     }
 }

@@ -3,8 +3,11 @@ package com.example.demo.entity;
 import com.example.demo.dto.BoardDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -30,18 +33,31 @@ public class BoardEntity extends BaseTimeEntity {
     @Column
     private int boardHits;
 
+    @Builder
+    private BoardEntity(String boardWriter, String boardPass, String boardTitle, String boardContents, int boardHits) {
+        this.boardWriter = boardWriter;
+        this.boardPass = boardPass;
+        this.boardTitle = boardTitle;
+        this.boardContents = boardContents;
+        this.boardHits = boardHits;
+    }
+
     public static BoardEntity toSaveEntity(BoardDTO boardDTO) {
-        BoardEntity boardEntity = new BoardEntity();
-        boardEntity.boardWriter = boardDTO.getBoardWriter();
-        boardEntity.boardPass = boardDTO.getBoardPass();
-        boardEntity.boardTitle = boardDTO.getBoardTitle();
-        boardEntity.boardContents = boardDTO.getBoardContents();
-        boardEntity.boardHits = 0;
-        return boardEntity;
+        return BoardEntity.builder()
+                .boardWriter(boardDTO.getBoardWriter())
+                .boardPass(boardDTO.getBoardPass())
+                .boardTitle(boardDTO.getBoardTitle())
+                .boardContents(boardDTO.getBoardContents())
+                .boardHits(0)
+                .build();
     }
 
     public void update(BoardDTO boardDTO) {
         this.boardTitle = boardDTO.getBoardTitle();
         this.boardContents = boardDTO.getBoardContents();
+    }
+
+    public boolean isPasswordMatched(String updatePass) {
+        return Objects.equals(this.boardPass, updatePass);
     }
 }
